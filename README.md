@@ -45,7 +45,7 @@ REDIS_PORT=6379
 
 Implement your AppModule using the follows exemple for public and private routes:
 
-```html
+```js
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
 
