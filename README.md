@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Rate Limit Implementation using [Nest](https://github.com/nestjs/nest).
 
 ## Installation
 
