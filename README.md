@@ -29,7 +29,7 @@
 ## Installation
 
 ```bash
-$ npm i @richiebono/rate-limit-middleware
+npm i @richiebono/rate-limit-middleware
 ```
 
 Add the following parameters to your .env file:
