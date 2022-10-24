@@ -27,7 +27,7 @@ export class PriveteRateLimitMiddleware implements NestMiddleware {
             } 
             else 
             {
-                await this.rateLimitService.update(rateLimitRequest.key, currentRequestTime.subtract(process.env.WINDOW_LOG_INTERVAL_IN_HOURS, 'hours').unix());
+                await this.rateLimitService.update(rateLimitRequest.key, currentRequestTime);
             }
             next();
         } 

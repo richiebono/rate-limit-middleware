@@ -1,17 +1,18 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { RateLimitRequest } from './rate.limit.request';
 import { Cache } from 'cache-manager';
+import { Moment } from 'moment';
 
 @Injectable()
 export class RateLimitService {
   
     constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-    private fillData(request: RateLimitRequest): RateLimitRequest {
+    private fillData(key: string, requestTimeStamp: number): RateLimitRequest {
         let rateLimitRequest = new RateLimitRequest();
-        rateLimitRequest.key = request.key;        
+        rateLimitRequest.key = key;        
         rateLimitRequest.requestCount = 1; 
-        rateLimitRequest.requestTimeStamp = request.requestTimeStamp;       
+        rateLimitRequest.requestTimeStamp = requestTimeStamp;       
         return rateLimitRequest;
     }
 
@@ -29,15 +30,13 @@ export class RateLimitService {
 
     public async add(request: RateLimitRequest) {
         this.checkIfCacheExist();        
-        const  rateLimitRequests = await this.filter(request.key, request.requestTimeStamp);
-        if (rateLimitRequests == null) {
-            let rateLimitRequest = this.fillData(request);
-            let newRecord = [] as RateLimitRequest[];            
-            newRecord.push(rateLimitRequest);
-            await this.cacheManager.set(request.key, newRecord);  
-            return rateLimitRequest;     
-        }
-        return request;
+        const  rateLimitRequests = await this.filter(request.key, request.requestTimeStamp);        
+        if (rateLimitRequests !== null)  return request;        
+        let rateLimitRequest = this.fillData(request.key, request.requestTimeStamp);
+        let newRecord = [] as RateLimitRequest[];            
+        newRecord.push(rateLimitRequest);
+        await this.cacheManager.set(request.key, newRecord);  
+        return rateLimitRequest;
     }
 
     public async filter(key: string, requestTimeStamp: number ): Promise<RateLimitRequest[]> {
@@ -54,15 +53,20 @@ export class RateLimitService {
         }, 0);
     }
     
-    public async update(key: string, requestTimeStamp: number) {
+    public async update(key: string, requestTimeStamp: Moment) {
         this.checkIfCacheExist();        
         const  rateLimitRequests = await this.findByKey(key);
         let lastRateLimitRequest = rateLimitRequests[rateLimitRequests.length - 1];
-        
-        if (lastRateLimitRequest.requestTimeStamp > requestTimeStamp) 
+        let potentialCurrentWindow = requestTimeStamp.subtract(process.env.WINDOW_LOG_INTERVAL_IN_HOURS, 'hours').unix();
+
+        if (lastRateLimitRequest.requestTimeStamp > potentialCurrentWindow) 
         {
             lastRateLimitRequest.requestCount++;
             rateLimitRequests[rateLimitRequests.length - 1] = lastRateLimitRequest;
+        }
+        else 
+        {
+            rateLimitRequests.push(this.fillData(key, requestTimeStamp.unix()));
         }
         
         await this.cacheManager.set(key, rateLimitRequests);
