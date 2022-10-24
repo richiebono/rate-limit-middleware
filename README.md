@@ -29,34 +29,37 @@
 ## Installation
 
 ```bash
-$ npm install
+$ npm i @richiebono/rate-limit-middleware
 ```
 
-## Running the app
+Add the following parameters to your .env file:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+MAX_REQUEST_BY_IP_IN_HOUR=100
+MAX_REQUEST_BY_TOKEN_IN_HOUR=200
+WINDOW_LOG_INTERVAL_IN_HOURS=1
+WINDOW_SIZE_IN_HOURS=24
+REDIS_HOST="localhost"
+REDIS_PORT=6379
 ```
 
-## Test
+Implement your AppModule using the follows exemple for public and private routes:
 
-```bash
-# unit tests
-$ npm run test
+```html
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+    consumer
+      .apply(PriveteRateLimitMiddleware)
+      .forRoutes(PostsController, UserController, AppController);
+    
+    consumer
+      .apply(PublicRateLimitMiddleware)
+      .forRoutes(LoginController, RegisterController);    
+  }
+}
 ```
+
 
 ## Support
 
@@ -64,9 +67,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Richard Bono](https://www.linkedin.com/in/richard-bono-75418818/)
 
 ## License
 
