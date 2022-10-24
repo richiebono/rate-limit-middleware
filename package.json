@@ -1,6 +1,6 @@
 {
   "name": "@richiebono/rate-limit-middleware",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Rate Limit Middleware",
   "author": "richiebono",
   "private": false,
