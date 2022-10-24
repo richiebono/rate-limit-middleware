@@ -14,4 +14,4 @@ import { redisStore } from 'cache-manager-redis-store';
   })],
   providers: [RateLimitService],
 })
-export class AppModule {}
+export class RateLimitModule {}
