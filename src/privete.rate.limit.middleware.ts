@@ -1,4 +1,4 @@
-import { Inject, Injectable, NestMiddleware, CACHE_MANAGER} from '@nestjs/common';
+import { Injectable, NestMiddleware} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as moment from 'moment-timezone';
 import { RateLimitRequest } from './rate.limit.request';
@@ -14,11 +14,13 @@ export class PriveteRateLimitMiddleware implements NestMiddleware {
         try 
         {      
             const currentRequestTime = moment();         
-            let rateLimitRequest = new RateLimitRequest();
-            rateLimitRequest.key = req.body.accessToken;
-            rateLimitRequest.requestTimeStamp = currentRequestTime.unix();
-            rateLimitRequest = await this.rateLimitService.add(rateLimitRequest);
-                   
+            
+            var rateLimitRequest = {
+                key: req.body.accessToken,
+                requestTimeStamp: currentRequestTime.unix()
+            } as RateLimitRequest;
+
+            await this.rateLimitService.add(rateLimitRequest);                   
             let totalRequests = await this.rateLimitService.getCount(rateLimitRequest.key, currentRequestTime.subtract(process.env.WINDOW_SIZE_IN_HOURS, 'hours').unix());
 
             if (totalRequests >= parseInt(process.env.MAX_REQUEST_BY_TOKEN_IN_HOUR)) 

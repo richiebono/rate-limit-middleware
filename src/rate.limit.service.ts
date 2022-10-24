@@ -35,13 +35,12 @@ export class RateLimitService {
         let rateLimitRequest = this.fillData(request.key, request.requestTimeStamp);
         let newRecord = [] as RateLimitRequest[];            
         newRecord.push(rateLimitRequest);
-        await this.cacheManager.set(request.key, newRecord);  
-        return rateLimitRequest;
+        await this.cacheManager.set(request.key, newRecord);          
     }
 
     public async filter(key: string, requestTimeStamp: number ): Promise<RateLimitRequest[]> {
         const  rateLimitRequests = await this.findByKey(key);
-        return rateLimitRequests.filter((entry) => {
+        return rateLimitRequests && rateLimitRequests.filter((entry) => {
             return entry.requestTimeStamp > requestTimeStamp;
         });
     }
@@ -58,9 +57,6 @@ export class RateLimitService {
         const  rateLimitRequests = await this.findByKey(key);
         let lastRateLimitRequest = rateLimitRequests[rateLimitRequests.length - 1];
         let potentialCurrentWindow = requestTimeStamp.subtract(process.env.WINDOW_LOG_INTERVAL_IN_HOURS, 'hours').unix();
-
-        console.log( {lastRateLimitRequest: lastRateLimitRequest});
-        console.log( {potentialCurrentWindow: potentialCurrentWindow});
 
         if (lastRateLimitRequest.requestTimeStamp > potentialCurrentWindow) 
         {
