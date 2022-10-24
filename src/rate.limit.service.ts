@@ -59,14 +59,19 @@ export class RateLimitService {
         let lastRateLimitRequest = rateLimitRequests[rateLimitRequests.length - 1];
         let potentialCurrentWindow = requestTimeStamp.subtract(process.env.WINDOW_LOG_INTERVAL_IN_HOURS, 'hours').unix();
 
+        console.log( {lastRateLimitRequest: lastRateLimitRequest});
+        console.log( {potentialCurrentWindow: potentialCurrentWindow});
+
         if (lastRateLimitRequest.requestTimeStamp > potentialCurrentWindow) 
         {
             lastRateLimitRequest.requestCount++;
             rateLimitRequests[rateLimitRequests.length - 1] = lastRateLimitRequest;
+            console.log( {rateLimitRequestsIf: rateLimitRequests});
         }
         else 
         {
             rateLimitRequests.push(this.fillData(key, requestTimeStamp.unix()));
+            console.log( {rateLimitRequestsElse: rateLimitRequests});
         }
         
         await this.cacheManager.set(key, rateLimitRequests);
