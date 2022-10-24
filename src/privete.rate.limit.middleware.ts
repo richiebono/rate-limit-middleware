@@ -16,14 +16,14 @@ export class PriveteRateLimitMiddleware implements NestMiddleware {
             const currentRequestTime = moment();         
             
             var rateLimitRequest = {
-                key: req.body.accessToken,
+                key: req.header('Authorization').split(' ')[1],
                 requestTimeStamp: currentRequestTime.unix()
             } as RateLimitRequest;
 
             await this.rateLimitService.add(rateLimitRequest);                   
             let totalRequests = await this.rateLimitService.getCount(rateLimitRequest.key, currentRequestTime.subtract(process.env.WINDOW_SIZE_IN_HOURS, 'hours').unix());
 
-            if (totalRequests >= parseInt(process.env.MAX_REQUEST_BY_TOKEN_IN_HOUR)) 
+            if (totalRequests > parseInt(process.env.MAX_REQUEST_BY_TOKEN_IN_HOUR)) 
             {
                 res.status(429).send('You have exceeded the access token requests limit allowed by hours!');
             } 
