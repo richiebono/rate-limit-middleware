@@ -1,6 +1,6 @@
 import { Inject, Injectable, NestMiddleware, CACHE_MANAGER} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { RateLimitRequest } from './rate.limit.request';
 import { RateLimitService } from './rate.limit.service';
 
