@@ -11,7 +11,7 @@ export class RateLimitService {
     private fillData(key: string, requestTimeStamp: number): RateLimitRequest {
         let rateLimitRequest = new RateLimitRequest();
         rateLimitRequest.key = key;        
-        rateLimitRequest.requestCount = 1; 
+        rateLimitRequest.requestCount = 0; 
         rateLimitRequest.requestTimeStamp = requestTimeStamp;       
         return rateLimitRequest;
     }
@@ -41,7 +41,7 @@ export class RateLimitService {
     public async filter(key: string, requestTimeStamp: number ): Promise<RateLimitRequest[]> {
         const  rateLimitRequests = await this.findByKey(key);
         return rateLimitRequests && rateLimitRequests.filter((entry) => {
-            return entry.requestTimeStamp > requestTimeStamp;
+            return entry.requestTimeStamp > requestTimeStamp && entry.key === key
         });
     }
 
@@ -58,16 +58,14 @@ export class RateLimitService {
         let lastRateLimitRequest = rateLimitRequests[rateLimitRequests.length - 1];
         let potentialCurrentWindow = requestTimeStamp.subtract(process.env.WINDOW_LOG_INTERVAL_IN_HOURS, 'hours').unix();
 
-        if (lastRateLimitRequest.requestTimeStamp > potentialCurrentWindow) 
+        if (lastRateLimitRequest.requestTimeStamp >= potentialCurrentWindow) 
         {
             lastRateLimitRequest.requestCount++;
             rateLimitRequests[rateLimitRequests.length - 1] = lastRateLimitRequest;
-            console.log( {rateLimitRequestsIf: rateLimitRequests});
         }
         else 
         {
             rateLimitRequests.push(this.fillData(key, requestTimeStamp.unix()));
-            console.log( {rateLimitRequestsElse: rateLimitRequests});
         }
         
         await this.cacheManager.set(key, rateLimitRequests);
