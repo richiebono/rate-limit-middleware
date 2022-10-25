@@ -13,8 +13,7 @@ export class PriveteRateLimitMiddleware implements NestMiddleware {
     
         try 
         {      
-            const currentRequestTime = moment();         
-            
+            const currentRequestTime = moment();
             var rateLimitRequest = {
                 key: req.header('Authorization').split(' ')[1],
                 requestTimeStamp: currentRequestTime.unix()
