@@ -44,6 +44,29 @@ REDIS_HOST="localhost"
 REDIS_PORT=6379
 ```
 
+Import the rate limit libs:
+
+```js
+import { 
+  PriveteRateLimitMiddleware, 
+  PublicRateLimitMiddleware, 
+  RateLimitModule, 
+  RateLimitService, 
+  configureRateLimitCacheModule 
+  } from '@richiebono/rate-limit-middleware';
+```
+
+Configugure your module:
+
+```js
+@Module({
+  imports: [
+    configureRateLimitCacheModule(),
+  ],
+  providers: [RateLimitService],
+})
+```
+
 Implement your AppModule using the follows exemple for public and private routes:
 
 ```js
@@ -60,7 +83,6 @@ export class AppModule implements NestModule {
   }
 }
 ```
-
 
 ## Support
 
