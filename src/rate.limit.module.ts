@@ -9,7 +9,8 @@ import { redisStore } from 'cache-manager-redis-store';
       socket: {
         host: process.env.REDIS_HOST,
         port: parseInt(process.env.REDIS_PORT),
-      }
+      },
+      ttl: parseInt(process.env.RATE_LIMIT_WINDOW_LOG_INTERVAL)
     })
   })],
   providers: [RateLimitService],

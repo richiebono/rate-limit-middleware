@@ -52,21 +52,18 @@ export class RateLimitService {
         }, 0);
     }
     
-    public async update(key: string, requestTimeStamp: Moment) {
-        this.checkIfCacheExist();        
+    public async update(key: string, requestTimeStamp: Moment, potentialCurrentWindow: number ) {
+        
+        this.checkIfCacheExist();             
         const  rateLimitRequests = await this.findByKey(key);
-        let lastRateLimitRequest = rateLimitRequests[rateLimitRequests.length - 1];
-        let potentialCurrentWindow = requestTimeStamp.subtract(process.env.WINDOW_LOG_INTERVAL_IN_HOURS, 'hours').unix();
+        let lastRateLimitRequest = rateLimitRequests[rateLimitRequests.length - 1];        
 
         if (lastRateLimitRequest.requestTimeStamp >= potentialCurrentWindow) 
         {
             lastRateLimitRequest.requestCount++;
             rateLimitRequests[rateLimitRequests.length - 1] = lastRateLimitRequest;
         }
-        else 
-        {
-            rateLimitRequests.push(this.fillData(key, requestTimeStamp.unix()));
-        }
+        else rateLimitRequests.push(this.fillData(key, requestTimeStamp.unix()));
         
         await this.cacheManager.set(key, rateLimitRequests);
     }
