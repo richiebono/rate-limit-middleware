@@ -2,6 +2,7 @@ name: Build and Publish Package to npmjs
 
 on:
   pull_request:
+    types: [closed]
     branches:
       - main
 
