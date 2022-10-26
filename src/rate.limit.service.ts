@@ -7,19 +7,7 @@ import { Moment } from 'moment';
 export class RateLimitService {
   
     constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
-
-    private rateLimeTtl = (() => {
-        const unitOfTime = process.env.RATE_LIMIT_UNIT_OF_TIME;
-        switch(unitOfTime) {  
-          case "minutes":
-                return 60;
-            case "days":
-              return 86400;                
-            default:
-                return 3600;
-          }
-    });
-    
+   
     private fillData(key: string, requestTimeStamp: number): RateLimitRequest {
         let rateLimitRequest = new RateLimitRequest();
         rateLimitRequest.key = key;        
@@ -47,7 +35,7 @@ export class RateLimitService {
         let rateLimitRequest = this.fillData(request.key, request.requestTimeStamp);
         let newRecord = [] as RateLimitRequest[];            
         newRecord.push(rateLimitRequest);
-        await this.cacheManager.set(request.key, newRecord, this.rateLimeTtl());          
+        await this.cacheManager.set(request.key, newRecord);          
     }
 
     public async filter(key: string, requestTimeStamp: number ): Promise<RateLimitRequest[]> {
@@ -77,6 +65,6 @@ export class RateLimitService {
         }
         else rateLimitRequests.push(this.fillData(key, requestTimeStamp.unix()));
         
-        await this.cacheManager.set(key, rateLimitRequests, this.rateLimeTtl());
+        await this.cacheManager.set(key, rateLimitRequests);
     }
 }
