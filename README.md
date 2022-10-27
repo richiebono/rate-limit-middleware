@@ -82,7 +82,7 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(PublicRateLimitMiddleware)
-      .forRoutes(LoginController);    
+      .forRoutes(LoginController, RegisterController);  
   }
 }
 ```
