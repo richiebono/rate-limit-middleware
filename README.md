@@ -26,6 +26,10 @@
 
 Rate Limit Implementation using [Nest](https://github.com/nestjs/nest).
 
+## Application with implementation example:
+https://github.com/richiebono/posts-api
+
+
 NPM Package URL:
 [NPM](https://www.npmjs.com/package/@richiebono/rate-limit-middleware)
 
