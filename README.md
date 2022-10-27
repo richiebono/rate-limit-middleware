@@ -75,11 +75,14 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(PriveteRateLimitMiddleware)
-      .forRoutes(PostsController, UserController, AppController);
-    
+      .exclude(
+        { path: 'api', method: RequestMethod.GET },
+      )
+      .forRoutes(PostsController, AppController);    
+
     consumer
       .apply(PublicRateLimitMiddleware)
-      .forRoutes(LoginController, RegisterController);    
+      .forRoutes(LoginController);    
   }
 }
 ```
