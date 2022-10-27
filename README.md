@@ -26,6 +26,9 @@
 
 Rate Limit Implementation using [Nest](https://github.com/nestjs/nest).
 
+NPM Package URL:
+[NPM](https://www.npmjs.com/package/@richiebono/rate-limit-middleware)
+
 ## Installation
 
 ```bash
