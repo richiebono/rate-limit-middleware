@@ -24,7 +24,6 @@ export class RateLimitService {
     public async findByKey(key: string): Promise<RateLimitRequest[]>
     {
         this.checkIfCacheExist();
-        if (!this.cacheManager) throw new Error('Redis client does not exist!');
         return (await this.cacheManager.get(key)) as RateLimitRequest[];
     }
 
