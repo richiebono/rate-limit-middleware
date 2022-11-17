@@ -24,16 +24,24 @@ export class PublicRateLimitMiddleware implements NestMiddleware {
                 requestTimeStamp: currentRequestTime.unix()
             } as RateLimitRequest;
 
-            await this.rateLimitService.add(rateLimitRequest);  
-            const potentialCurrentWindow = currentRequestTime.subtract(limitWindowSize, unitOfTime).unix();
-            const totalRequests = await this.rateLimitService.getCount(rateLimitRequest.key, potentialCurrentWindow);
+            this.rateLimitService.add(rateLimitRequest).then(() => {
+                
+                const potentialCurrentWindow = currentRequestTime.subtract(limitWindowSize, unitOfTime).unix();
             
-            if (totalRequests >= maxRequestAllowed) 
-                res.status(429).send({ status: 429, message: `You have exceeded the ${ maxRequestAllowed } IP requests limit allowed per ${ unitOfTime }, try again at ${ nextWindowsTime }!`});
-            else 
-                await this.rateLimitService.update(rateLimitRequest.key, currentRequestTime, potentialCurrentWindow);
-            
-            next();
+                this.rateLimitService.getCount(rateLimitRequest.key, potentialCurrentWindow).then(totalRequests => {
+                    
+                    if (totalRequests >= maxRequestAllowed)
+                    {
+                        res.status(429).send({ status: 429, message: `You have exceeded the ${ maxRequestAllowed } IP requests limit allowed per ${ unitOfTime }, try again at ${ nextWindowsTime }!`});
+                    }                        
+                    else 
+                    {
+                        this.rateLimitService.update(rateLimitRequest.key, currentRequestTime, potentialCurrentWindow).then(() =>{
+                            next();
+                        });
+                    }
+                })
+            }); 
         } 
         catch (error) {
             next(error);

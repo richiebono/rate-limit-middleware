@@ -19,22 +19,29 @@ export class PriveteRateLimitMiddleware implements NestMiddleware {
             const maxRequestAllowed = parseInt(process.env.RATE_LIMIT_MAX_REQUEST_BY_TOKEN);
             const limitWindowSize = process.env.RATE_LIMIT_WINDOW_SIZE;
 
-            const rateLimitRequest = {
+            var rateLimitRequest = {
                 key: req.header('Authorization').split(' ')[1],
                 requestTimeStamp: currentRequestTime.unix()
             } as RateLimitRequest;
               
-            await this.rateLimitService.add(rateLimitRequest);  
+            this.rateLimitService.add(rateLimitRequest).then(() => {
+                
+                const potentialCurrentWindow = currentRequestTime.subtract(limitWindowSize, unitOfTime).unix();
             
-            const potentialCurrentWindow = currentRequestTime.subtract(limitWindowSize, unitOfTime).unix();
-            const totalRequests = await this.rateLimitService.getCount(rateLimitRequest.key, potentialCurrentWindow);
-            
-            if (totalRequests >= maxRequestAllowed) 
-                res.status(429).send({ status: 429, message: `You have exceeded the ${ maxRequestAllowed } access token requests limit allowed per ${ unitOfTime }, try again at ${ nextWindowsTime }!`});
-            else 
-                await this.rateLimitService.update(rateLimitRequest.key, currentRequestTime, potentialCurrentWindow);
-            
-            next();
+                this.rateLimitService.getCount(rateLimitRequest.key, potentialCurrentWindow).then(totalRequests => {
+                    
+                    if (totalRequests >= maxRequestAllowed)
+                    {
+                        res.status(429).send({ status: 429, message: `You have exceeded the ${ maxRequestAllowed } access token requests limit allowed per ${ unitOfTime }, try again at ${ nextWindowsTime }!`});
+                    }                        
+                    else 
+                    {
+                        this.rateLimitService.update(rateLimitRequest.key, currentRequestTime, potentialCurrentWindow).then(() =>{
+                            next();
+                        });
+                    }
+                })
+            });            
         } 
         catch (error) {
             next(error);
